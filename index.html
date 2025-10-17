@@ -1,0 +1,82 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub User Fetcher</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        #loading {
+            display: none;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="text-center">GitHub User Fetcher</h1>
+    <form id="github-user-test" class="mt-4">
+        <div class="mb-3">
+            <label for="username" class="form-label">GitHub Username</label>
+            <input type="text" class="form-control" id="username" required>
+        </div>
+        <div class="mb-3">
+            <label for="token" class="form-label">Personal Access Token (optional)</label>
+            <input type="text" class="form-control" id="token">
+        </div>
+        <button type="submit" class="btn btn-primary">Fetch Creation Date</button>
+    </form>
+    <div id="loading" class="text-center mt-4">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div id="github-created-at" class="mt-4"></div>
+    <div id="error-message" class="error mt-2"></div>
+</div>
+
+<script>
+    document.getElementById('github-user-test').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const token = document.getElementById('token').value;
+        const errorMessage = document.getElementById('error-message');
+        const createdAtDiv = document.getElementById('github-created-at');
+        const loadingDiv = document.getElementById('loading');
+
+        errorMessage.textContent = '';
+        createdAtDiv.textContent = '';
+        loadingDiv.style.display = 'block';
+
+        try {
+            const response = await fetch(`https://api.github.com/users/${username}${token ? '?access_token=' + token : ''}`);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} ${response.statusText}`);
+            }
+            const data = await response.json();
+            const createdAt = new Date(data.created_at).toISOString().split('T')[0];
+            createdAtDiv.textContent = `Account Creation Date: ${createdAt} UTC`;
+        } catch (error) {
+            errorMessage.textContent = error.message || 'An error occurred while fetching data.';
+        } finally {
+            loadingDiv.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
+```
